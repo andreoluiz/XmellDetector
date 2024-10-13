@@ -1,7 +1,7 @@
 import xml.etree.ElementTree as ET
 import os
 
-# Função para ler um arquivo XML, extrair o nome do método, e contar as tags <print>, <empty/>, <loop for condition>, <if>, <else>, <loopFor/>
+# Função para ler um arquivo XML, extrair o nome do método, e contar as tags <print>, <empty/>, <loop for condition>, <if>, <else>, <loopFor/>, <literal>
 def processar_xml(xml_file, txt_file):
     try:
         # Parse o XML
@@ -22,6 +22,9 @@ def processar_xml(xml_file, txt_file):
         literal_tags = root.findall('.//literal')
         quantidade_literal = len(literal_tags)
 
+        exception_tags = root.findall('.//try')
+        quantidade_exception = len(exception_tags)
+
         # Contar quantas tags <if>, <else>, e <loopFor/> existem
         if_tags = root.findall('.//if')
         else_tags = root.findall('.//else')
@@ -36,6 +39,7 @@ def processar_xml(xml_file, txt_file):
             file.write(f"Quantidade de literais: {quantidade_literal}\n")
             file.write(f"Quantidade de prints: {quantidade_prints}\n")
             file.write(f"Quantidade de empty: {quantidade_emptys}\n")
+            file.write(f"Quantidade de exceptions: {quantidade_exception}\n")
             file.write(f"Quantidade de condicionais (if, else, loopFor): {quantidade_condicionais}\n\n")
     except ET.ParseError:
         print(f"Erro ao analisar o arquivo XML: {xml_file}")
