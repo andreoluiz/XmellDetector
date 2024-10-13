@@ -19,6 +19,9 @@ def processar_xml(xml_file, txt_file):
         empty_tags = root.findall('.//empty')
         quantidade_emptys = len(empty_tags)
 
+        literal_tags = root.findall('.//literal')
+        quantidade_literal = len(literal_tags)
+
         # Contar quantas tags <if>, <else>, e <loopFor/> existem
         if_tags = root.findall('.//if')
         else_tags = root.findall('.//else')
@@ -30,6 +33,7 @@ def processar_xml(xml_file, txt_file):
         # Escrever no arquivo de texto
         with open(txt_file, 'a') as file:  # 'a' para adicionar ao arquivo sem sobrescrever
             file.write(f"Método testado: {nome_metodo}\n")
+            file.write(f"Quantidade de literais: {quantidade_literal}\n")
             file.write(f"Quantidade de prints: {quantidade_prints}\n")
             file.write(f"Quantidade de empty: {quantidade_emptys}\n")
             file.write(f"Quantidade de condicionais (if, else, loopFor): {quantidade_condicionais}\n\n")
