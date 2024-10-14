@@ -41,8 +41,9 @@ def processar_xml(xml_file, txt_file):
             file.write(f"Quantidade de empty: {quantidade_emptys}\n")
             file.write(f"Quantidade de exceptions: {quantidade_exception}\n")
             file.write(f"Quantidade de condicionais (if, else, loopFor): {quantidade_condicionais}\n\n")
-    except ET.ParseError:
-        print(f"Erro ao analisar o arquivo XML: {xml_file}")
+    except ET.ParseError as e:
+        print(f"Erro ao analisar o arquivo XML: {xml_file}\nErro: {e}")
+
 
 # Função para ler vários arquivos XML de uma pasta
 def ler_arquivos_xml_da_pasta(pasta, txt_file):
@@ -58,7 +59,7 @@ def ler_arquivos_xml_da_pasta(pasta, txt_file):
             processar_xml(caminho_completo, txt_file)
 
 # Defina o nome da pasta e do arquivo de saída
-pasta_xml = r'C:\Users\nacla\Downloads\xmlTestGenerator-1.0\xmlTestGenerator-1.0\output_tests'
+pasta_xml = r'C:\Users\nacla\OneDrive\desktop\André\xmlTestGenerator\saida'
 arquivo_txt_saida = 'saida.txt'
 
 # Executar a função para processar todos os arquivos XML da pasta
