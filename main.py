@@ -8,23 +8,15 @@ def processar_xml(xml_file, txt_file):
 
         nome_metodo = root.attrib.get('name', 'Desconhecido')
 
-        print_tags = root.findall('.//print')
-        quantidade_prints = len(print_tags)
+        quantidade_prints = len(root.findall('.//print'))
+        quantidade_emptys = len(root.findall('.//empty'))
+        quantidade_literal = len(root.findall('.//literal'))
+        quantidade_exception = len(root.findall('.//try'))
+        quantidade_if = len(root.findall('.//if'))
+        quantidade_else = len(root.findall('.//else'))
+        quantidade_loopFor = len(root.findall('.//LoopFor'))
 
-        empty_tags = root.findall('.//empty')
-        quantidade_emptys = len(empty_tags)
-
-        literal_tags = root.findall('.//literal')
-        quantidade_literal = len(literal_tags)
-
-        exception_tags = root.findall('.//try')
-        quantidade_exception = len(exception_tags)
-
-        if_tags = root.findall('.//if')
-        else_tags = root.findall('.//else')
-        loopFor_tags = root.findall('.//loopFor')
-
-        quantidade_condicionais = len(if_tags) + len(else_tags) + len(loopFor_tags)
+        quantidade_condicionais = quantidade_if + quantidade_else + quantidade_loopFor
 
         with open(txt_file, 'a') as file:
             file.write(f"Método testado: {nome_metodo}\n")
