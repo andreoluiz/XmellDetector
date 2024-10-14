@@ -11,14 +11,12 @@ def processar_xml(xml_file, txt_file):
 
         quantidade_prints = len(root.findall('.//print'))
         quantidade_emptys = len(root.findall('.//empty'))
-        quantidade_asserts = len(root.findall('.//assertEquals'))  # Conta os asserts
-        quantidade_literal = 0  # Inicializa contagem de literais
+        quantidade_asserts = len(root.findall('.//assertEquals'))
+        quantidade_literal = 0
 
-        # Checar os literais nos atributos de assertEquals
         for assert_elem in root.findall('.//assertEquals'):
             expected = assert_elem.attrib.get('expected', '')
             actual = assert_elem.attrib.get('actual', '')
-            # Conta literais apenas se estiverem nos asserts
             quantidade_literal += count_literals_in_expression(expected) + count_literals_in_expression(actual)
 
         quantidade_exception = len(root.findall('.//try'))
@@ -33,18 +31,15 @@ def processar_xml(xml_file, txt_file):
             file.write(f"Quantidade de literais dentro de asserts: {quantidade_literal}\n")
             file.write(f"Quantidade de prints: {quantidade_prints}\n")
             file.write(f"Quantidade de empty: {quantidade_emptys}\n")
-            file.write(f"Quantidade de asserts: {quantidade_asserts}\n")  # Adiciona contagem de asserts
+            file.write(f"Quantidade de asserts: {quantidade_asserts}\n")
             file.write(f"Quantidade de exceptions: {quantidade_exception}\n")
             file.write(f"Quantidade de condicionais (if, else, loopFor): {quantidade_condicionais}\n\n")
     except ET.ParseError as e:
         print(f"Erro ao analisar o arquivo XML: {xml_file}\nErro: {e}")
 
 def count_literals_in_expression(expression):
-    """Conta literais numéricos e de string em uma expressão."""
     literals_count = 0
-    # Contar literais numéricos
     literals_count += len(re.findall(r'<literalNumber>(\d+)</literalNumber>', expression))
-    # Contar literais de string
     literals_count += len(re.findall(r'<literalString>(.*?)</literalString>', expression))
     return literals_count
 
