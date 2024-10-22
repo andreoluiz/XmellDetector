@@ -1,8 +1,9 @@
 import xml.etree.ElementTree as ET
 import os
 import re
+import csv
 
-def process_xml(xml_file, output_file):
+def process_xml(xml_file, csv_writer):
     try:
         tree = ET.parse(xml_file)
         root = tree.getroot()
@@ -35,28 +36,17 @@ def process_xml(xml_file, output_file):
         for_loop_count = len(root.findall('.//LoopFor'))
         conditional_count = if_count + else_count + for_loop_count
 
-        output_file.write(f"Tested method: {method_name}\n")
-        output_file.write(f"Magic Literal: {literal_count}\n")
-        output_file.write(f"Redundant Print: {print_count}\n")
-        output_file.write(f"Duplicated Assert: {duplicate_count}\n")
-
-        if asserts_without_message:
-            output_file.write("assertion roulette: Yes\n")
-        else:
-            output_file.write("assertion roulette: No\n")
-
-        if unknown_test:
-            output_file.write("Unknown test: Yes\n")
-        else:
-            output_file.write("Unknown test: No\n")
-
-        if empty_test:
-            output_file.write("Empty Test: Yes\n")
-        else:
-            output_file.write("Empty Test: No\n")
-
-        output_file.write(f"Number of exceptions: {exception_count}\n")
-        output_file.write(f"Number of conditionals (if, else, loopFor): {conditional_count}\n\n")
+        csv_writer.writerow([
+            method_name,
+            literal_count,
+            print_count,
+            duplicate_count,
+            "Yes" if asserts_without_message else "No",
+            "Yes" if unknown_test else "No",
+            "Yes" if empty_test else "No",
+            exception_count,
+            conditional_count
+        ])
     except ET.ParseError as e:
         print(f"Error parsing XML file: {xml_file}\nError: {e}")
 
@@ -112,22 +102,26 @@ def count_literals_in_expression(expression):
     literals_count += len(re.findall(r'<literalString>(.*?)</literalString>', expression))
     return literals_count
 
-def read_xml_files_from_folder(folder, txt_file):
+def read_xml_files_from_folder(folder, csv_file):
     if not os.path.exists(folder):
         print(f"The folder {folder} was not found.")
         return
     
-    with open(txt_file, 'w') as output_file:
-        output_file.write("Test results:\n\n")
+    with open(csv_file, 'w', newline='') as output_csv:
+        csv_writer = csv.writer(output_csv)
+        csv_writer.writerow(["Tested Method", "Magic Literal", "Redundant Print", "Duplicated Assert", 
+                             "Assertion Roulette", "Unknown Test", "Empty Test", "Number of Exceptions", 
+                             "Number of Conditionals"])
+
         for filename in os.listdir(folder):
             if filename.endswith(".xml"):
                 full_path = os.path.join(folder, filename)
                 print(f"Reading file: {full_path}")
-                process_xml(full_path, output_file)
+                process_xml(full_path, csv_writer)
 
 folder_xml = r'C:\Users\nacla\OneDrive\desktop\André\xmlTestGenerator\saida'
-output_txt_file = 'output.txt'
+output_csv_file = 'output.csv'
 
-read_xml_files_from_folder(folder_xml, output_txt_file)
+read_xml_files_from_folder(folder_xml, output_csv_file)
 
 print("Processing completed!")
