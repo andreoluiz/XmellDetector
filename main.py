@@ -22,7 +22,7 @@ def process_xml(xml_file, csv_writer):
 
         unknown_test = detect_unknown_test(root)
 
-        empty_test = detect_empty_test(root)
+        empty_test_count = detect_empty_test(root)
 
         literal_count = sum(
             count_literals_in_expression(assert_elem.attrib.get('expected', '')) +
@@ -42,7 +42,7 @@ def process_xml(xml_file, csv_writer):
                              duplicate_count,  # Agora vai ser 'Yes' ou 'No'
                              "Yes" if asserts_without_message else "No",
                              "Yes" if unknown_test else "No",
-                             "Yes" if empty_test else "No",
+                             "Yes" if empty_test_count != 0 else "No",
                              exception_count,
                              conditional_count])
     except ET.ParseError as e:
@@ -101,7 +101,11 @@ def detect_unknown_test(root):
     return not has_assertions and not test_expected
 
 def detect_empty_test(root):
-    return "Yes" if len(root.findall('.//empty')) > 0 else "No"
+    empty_test_count = sum(1 for empty_elem in root.findall('.//empty') if empty_elem.tag == 'empty')
+    
+    return empty_test_count
+
+
 
 def count_literals_in_expression(expression):
     literals_count = 0
