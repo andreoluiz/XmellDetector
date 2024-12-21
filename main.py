@@ -11,10 +11,6 @@ def process_xml(xml_file, csv_writer):
         method_name = root.attrib.get('name', 'Unknown')
         print_count = len(root.findall('.//print'))
 
-        assert_count = len(root.findall('.//assertEquals')) + \
-                       len(root.findall('.//assertTrue')) + \
-                       len(root.findall('.//assertFalse'))
-
         duplicates = detect_duplicate_asserts(root)
         duplicate_count = "Yes" if duplicates == "Yes" else "No"  # Modificado para 'Yes' ou 'No'
 
@@ -41,7 +37,7 @@ def process_xml(xml_file, csv_writer):
                              print_count,
                              duplicate_count,  # Agora vai ser 'Yes' ou 'No'
                              "Yes" if asserts_without_message else "No",
-                             "Yes" if unknown_test else "No",
+                             "Yes" if unknown_test and empty_test_count == 0 else "No",
                              "Yes" if empty_test_count != 0 else "No",
                              exception_count,
                              conditional_count])
