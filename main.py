@@ -16,7 +16,7 @@ def process_xml(xml_file, csv_writer):
                        len(root.findall('.//assertFalse'))
 
         duplicates = detect_duplicate_asserts(root)
-        duplicate_count = len(duplicates)
+        duplicate_count = "Yes" if duplicates == "Yes" else "No"  # Modificado para 'Yes' ou 'No'
 
         asserts_without_message = detect_assertion_roulette(root)
 
@@ -36,36 +36,44 @@ def process_xml(xml_file, csv_writer):
         for_loop_count = len(root.findall('.//LoopFor'))
         conditional_count = if_count + else_count + for_loop_count
 
-        csv_writer.writerow([
-            method_name,
-            literal_count,
-            print_count,
-            duplicate_count,
-            "Yes" if asserts_without_message else "No",
-            "Yes" if unknown_test else "No",
-            "Yes" if empty_test else "No",
-            exception_count,
-            conditional_count
-        ])
+        csv_writer.writerow([method_name,
+                             literal_count,
+                             print_count,
+                             duplicate_count,  # Agora vai ser 'Yes' ou 'No'
+                             "Yes" if asserts_without_message else "No",
+                             "Yes" if unknown_test else "No",
+                             "Yes" if empty_test else "No",
+                             exception_count,
+                             conditional_count])
     except ET.ParseError as e:
         print(f"Error parsing XML file: {xml_file}\nError: {e}")
 
 def detect_duplicate_asserts(root):
-    asserts = {}
-    duplicates = []
+    asserts = set()
+    duplicates = False  # Inicializamos como False, indicando que não há duplicação.
 
     for assert_elem in root.findall('.//assertEquals'):
         expected = assert_elem.attrib.get('expected', '')
         actual = assert_elem.attrib.get('actual', '')
 
-        key = (expected, actual)
+        # Normalizar expressões, se necessário
+        expected_normalized = normalize_assert_expression(expected)
+        actual_normalized = normalize_assert_expression(actual)
+
+        key = (expected_normalized, actual_normalized)
 
         if key in asserts:
-            duplicates.append(key)
+            duplicates = True  # Encontrou duplicação, alteramos para True
+            break  # Podemos interromper a busca, pois já encontramos duplicação
         else:
-            asserts[key] = 1
+            asserts.add(key)
 
-    return duplicates
+    return "Yes" if duplicates else "No"
+
+def normalize_assert_expression(expression):
+    # Normalizar a expressão removendo detalhes como coordenadas de 'tile'
+    expression = re.sub(r'world.tile\(\d+, \d+\)', 'world.tile()', expression)
+    return expression
 
 def detect_assertion_roulette(root):
     asserts_without_message = 0
@@ -81,9 +89,11 @@ def detect_assertion_roulette(root):
     return asserts_without_message > 1 and assert_count > 1
 
 def detect_unknown_test(root):
-    has_assertions = len(root.findall('.//assertEquals')) > 0 or \
-                     len(root.findall('.//assertTrue')) > 0 or \
-                     len(root.findall('.//assertFalse')) > 0
+    assert_types = ['assertEquals', 'assertNotEquals', 'assertTrue', 'assertFalse', 
+                    'assertNull', 'assertNotNull', 'assertArrayEquals', 
+                    'assertSame', 'assertNotSame', 'fail']
+    
+    has_assertions = any(len(root.findall(f'.//{assert_type}')) > 0 for assert_type in assert_types)
 
     test_expected = root.find('.//Test') is not None and \
                    root.find('.//Test').get('expected') is not None
@@ -91,10 +101,7 @@ def detect_unknown_test(root):
     return not has_assertions and not test_expected
 
 def detect_empty_test(root):
-    return len(root.findall('.//assertEquals')) == 0 and \
-           len(root.findall('.//assertTrue')) == 0 and \
-           len(root.findall('.//assertFalse')) == 0 and \
-           len(root.findall('.//print')) == 0
+    return "Yes" if len(root.findall('.//empty')) > 0 else "No"
 
 def count_literals_in_expression(expression):
     literals_count = 0
