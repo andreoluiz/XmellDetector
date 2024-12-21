@@ -27,7 +27,7 @@ def process_xml(xml_file, csv_writer):
         )
 
         exception_count = len(root.findall('.//try'))
-        if_count = len(root.findall('.//if'))
+        if_count = len(root.findall('.//If'))
         else_count = len(root.findall('.//else'))
         for_loop_count = len(root.findall('.//LoopFor'))
         conditional_count = if_count + else_count + for_loop_count
